@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veritas AI — Machine Learning Fake News Detector</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+    <div class="app-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <i data-lucide="shield-check" class="glow-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Veritas<span>AI</span></h1>
+                    <p>Credential Analyzer</p>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="tab-detector" id="nav-btn-detector">
+                    <i data-lucide="scan-eye"></i>
+                    <span>Credibility Analyzer</span>
+                </button>
+                <button class="nav-item" data-tab="tab-sandbox" id="nav-btn-sandbox">
+                    <i data-lucide="flask-conical"></i>
+                    <span>ML Sandbox</span>
+                </button>
+                <button class="nav-item" data-tab="tab-csv" id="nav-btn-csv">
+                    <i data-lucide="upload-cloud"></i>
+                    <span>Dataset Trainer</span>
+                </button>
+                <button class="nav-item" data-tab="tab-stats" id="nav-btn-stats">
+                    <i data-lucide="database"></i>
+                    <span>Model Insights</span>
+                </button>
+            </nav>
+            
+            <div class="model-status-widget">
+                <div class="status-header">
+                    <span class="pulse-dot"></span>
+                    <span class="status-title">Active Model Status</span>
+                </div>
+                <div class="status-body">
+                    <p>Accuracy: <strong id="widget-accuracy">0.00%</strong></p>
+                    <p>Vocab Size: <strong id="widget-vocab">0 words</strong></p>
+                    <p>Trained On: <strong id="widget-samples">0 items</strong></p>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- TOP BAR -->
+            <header class="top-bar">
+                <div class="search-mock">
+                    <i data-lucide="info"></i>
+                    <span>Interactive Machine Learning News Verifier</span>
+                </div>
+                <div class="user-profile">
+                    <div class="profile-text">
+                        <span class="role">Local Instance</span>
+                        <span class="status-active">Connected</span>
+                    </div>
+                    <div class="profile-avatar">ML</div>
+                </div>
+            </header>
+            
+            <!-- ================= TAB 1: DETECTOR ================= -->
+            <section id="tab-detector" class="tab-pane active">
+                <div class="tab-header">
+                    <h2>Credibility Analyzer</h2>
+                    <p>Paste any news article, report, or headline to scan for deceptive patterns using our TF-IDF Naive Bayes classification model.</p>
+                </div>
+                
+                <div class="grid-layout">
+                    <!-- Left: Text Input Column -->
+                    <div class="panel card text-input-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="text-quote"></i>News Article Content</span>
+                            <div class="sample-actions">
+                                <span class="action-label">Load Samples:</span>
+                                <button class="btn btn-sample" data-sample="reuters">Real (Reuters)</button>
+                                <button class="btn btn-sample" data-sample="conspiracy">Fake (Conspiracy)</button>
+                                <button class="btn btn-sample" data-sample="miracle">Fake (Health Cure)</button>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <textarea id="news-text-input" placeholder="Paste news article, claim, statement, or headline here (minimum 10 words)..."></textarea>
+                            <div class="textarea-footer">
+                                <span id="word-counter">0 words</span>
+                                <button id="btn-clear-text" class="btn btn-secondary"><i data-lucide="trash-2"></i>Clear</button>
+                                <button id="btn-analyze" class="btn btn-primary"><i data-lucide="wand-2"></i>Analyze Content</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Quick Results Dial / Panel -->
+                    <div class="panel card results-summary-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="pie-chart"></i>Evaluation Summary</span>
+                        </div>
+                        <div class="panel-body centered-content">
+                            <!-- Veracity Gauge -->
+                            <div class="gauge-container">
+                                <svg class="progress-ring" width="200" height="200">
+                                    <circle class="progress-ring-circle-bg" stroke="#1e293b" stroke-width="12" fill="transparent" r="80" cx="100" cy="100"/>
+                                    <circle id="gauge-circle" class="progress-ring-circle" stroke="#10b981" stroke-width="12" fill="transparent" r="80" cx="100" cy="100"/>
+                                </svg>
+                                <div class="gauge-content">
+                                    <span id="gauge-value" class="gauge-val">--%</span>
+                                    <span class="gauge-lbl">Credibility</span>
+                                </div>
+                            </div>
+                            
+                            <div id="verdict-banner" class="verdict-tag neutral">
+                                <i data-lucide="alert-circle" id="verdict-icon"></i>
+                                <span id="verdict-text">Ready for analysis</span>
+                            </div>
+                            
+                            <div class="prediction-details">
+                                <p id="prediction-desc">Enter article text and press the Analyze button to extract model inferences.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detailed Analysis section (shown after prediction) -->
+                <div id="detailed-results-section" class="details-section hidden">
+                    <div class="section-title">
+                        <h3>Linguistic & Model Interpretation Details</h3>
+                    </div>
+                    
+                    <!-- Tabs inside analysis -->
+                    <div class="analysis-tabs">
+                        <button class="analysis-tab-btn active" data-subtab="sub-interpret">Model Explanation</button>
+                        <button class="analysis-tab-btn" data-subtab="sub-stylometrics">Linguistic Metrics</button>
+                    </div>
+                    
+                    <!-- Subtab 1: Model Feature Highlight -->
+                    <div id="sub-interpret" class="subtab-pane active">
+                        <div class="info-alert">
+                            <i data-lucide="info"></i>
+                            <p><strong>Linguistic Feature Highlighting:</strong> Green words push the classifier toward <strong>REAL</strong>. Red words push toward <strong>FAKE</strong>. Intensity represents word significance. Words filtered out by the model (stopwords) are uncolored.</p>
+                        </div>
+                        <div class="card highlighted-text-box" id="highlighted-text-container">
+                            <!-- Dynamically populated -->
+                        </div>
+                        
+                        <div class="word-importance-split">
+                            <div class="importance-col real-words">
+                                <h4><i data-lucide="check-circle" class="text-green"></i>Top Real-News Indicators</h4>
+                                <div class="word-list" id="real-indicators-list">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                            <div class="importance-col fake-words">
+                                <h4><i data-lucide="x-circle" class="text-red"></i>Top Fake-News Indicators</h4>
+                                <div class="word-list" id="fake-indicators-list">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subtab 2: Stylometrics cards -->
+                    <div id="sub-stylometrics" class="subtab-pane">
+                        <div class="stylometrics-grid">
+                            <div class="stylo-card">
+                                <div class="stylo-icon"><i data-lucide="type"></i></div>
+                                <h5>Uppercase Density</h5>
+                                <p class="stylo-val" id="metric-caps">0%</p>
+                                <span class="stylo-desc">Capital letters ratio. Over 10% may indicate sensationalised 'shouting'.</span>
+                            </div>
+                            <div class="stylo-card">
+                                <div class="stylo-icon"><i data-lucide="smile"></i></div>
+                                <h5>Emotional Bias</h5>
+                                <p class="stylo-val" id="metric-subjectivity">0%</p>
+                                <span class="stylo-desc">Density of clickbait or sensationalised keywords.</span>
+                            </div>
+                            <div class="stylo-card">
+                                <div class="stylo-icon"><i data-lucide="book-open"></i></div>
+                                <h5>Readability Grade</h5>
+                                <p class="stylo-val" id="metric-readability">0/100</p>
+                                <span class="stylo-desc">Flesch ease index. Higher values represent simpler, direct writing.</span>
+                            </div>
+                            <div class="stylo-card">
+                                <div class="stylo-icon"><i data-lucide="alert-triangle"></i></div>
+                                <h5>Sensational Punctuation</h5>
+                                <p class="stylo-val" id="metric-exclamation">0.0</p>
+                                <span class="stylo-desc">Exclamations per 100 words. Excessive symbols suggest dramatisation.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ================= TAB 2: SANDBOX ================= -->
+            <section id="tab-sandbox" class="tab-pane">
+                <div class="tab-header">
+                    <h2>Interactive Machine Learning Sandbox</h2>
+                    <p>Inspect the underlying training dataset, add your own custom entries, and retrain the classifier live. You will see how adding new documents influences the vocabulary and active model accuracy.</p>
+                </div>
+                
+                <div class="double-layout">
+                    <!-- Sandbox Controls (Left) -->
+                    <div class="panel card form-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="plus-circle"></i>Add Training Instance</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label for="sandbox-label">Veracity Class Label:</label>
+                                <select id="sandbox-label" class="form-control">
+                                    <option value="REAL">REAL (Trustworthy News)</option>
+                                    <option value="FAKE">FAKE (Deceptive/Sensational/Spam)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sandbox-text">Document Content:</label>
+                                <textarea id="sandbox-text" class="form-control text-sm" placeholder="Write a short news snippet to add to the training corpus..."></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button id="btn-sandbox-add" class="btn btn-secondary"><i data-lucide="plus"></i>Insert Document</button>
+                                <button id="btn-sandbox-retrain" class="btn btn-primary"><i data-lucide="play-circle"></i>Retrain Classifier</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sandbox Table (Right) -->
+                    <div class="panel card table-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="list"></i>Corpus Documents (<span id="sandbox-count">0</span> items)</span>
+                            <button id="btn-sandbox-reset" class="btn btn-link text-red text-sm"><i data-lucide="rotate-ccw"></i>Reset Default</button>
+                        </div>
+                        <div class="panel-body scrollable-body">
+                            <table class="sandbox-table">
+                                <thead>
+                                    <tr>
+                                        <th>Label</th>
+                                        <th>News Excerpt</th>
+                                        <th width="80">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sandbox-table-body">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ================= TAB 3: DATASET TRAINER ================= -->
+            <section id="tab-csv" class="tab-pane">
+                <div class="tab-header">
+                    <h2>CSV Dataset Training Hub</h2>
+                    <p>Load external CSV files (from Kaggle, research sites, or custom collections) to train the model. Map the text and label columns, slide the training split, and train the classifier instantly.</p>
+                </div>
+                
+                <div class="grid-layout">
+                    <!-- CSV Config (Left) -->
+                    <div class="panel card csv-config-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="settings-2"></i>Training Configuration</span>
+                        </div>
+                        <div class="panel-body">
+                            <form id="csv-upload-form">
+                                <div class="form-group">
+                                    <label>Upload CSV File:</label>
+                                    <div class="file-dropzone" id="csv-dropzone">
+                                        <i data-lucide="upload" class="dropzone-icon"></i>
+                                        <span class="dropzone-text">Click or drag & drop a .csv file here</span>
+                                        <input type="file" id="csv-file-input" accept=".csv" class="hidden-input">
+                                        <span id="selected-file-name" class="selected-file">No file chosen</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <div class="col">
+                                        <label for="csv-text-col">Text Column Name:</label>
+                                        <input type="text" id="csv-text-col" value="text" class="form-control" placeholder="e.g. text, title, content">
+                                    </div>
+                                    <div class="col">
+                                        <label for="csv-label-col">Label Column Name:</label>
+                                        <input type="text" id="csv-label-col" value="label" class="form-control" placeholder="e.g. label, veracity, class">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Validation Holdout (Test Split): <span id="split-val">20%</span></label>
+                                    <input type="range" id="csv-split-slider" min="10" max="40" step="5" value="20" class="range-slider">
+                                    <div class="range-labels">
+                                        <span>90% Train / 10% Test</span>
+                                        <span>60% Train / 40% Test</span>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" id="btn-csv-train" class="btn btn-primary btn-block" disabled>
+                                    <i data-lucide="cpu"></i>Train Model on CSV
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Training Results (Right) -->
+                    <div class="panel card csv-results-panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i data-lucide="bar-chart-3"></i>Training Evaluation Report</span>
+                        </div>
+                        <div class="panel-body" id="csv-report-body">
+                            <!-- Placeholder -->
+                            <div class="report-placeholder">
+                                <i data-lucide="line-chart"></i>
+                                <p>Upload a CSV file and train the classifier to generate the validation metrics report.</p>
+                            </div>
+                            
+                            <!-- Actual content hidden initially -->
+                            <div id="csv-metrics-container" class="hidden">
+                                <div class="stats-overview">
+                                    <div class="stat-card gold">
+                                        <span class="stat-lbl">Validation Accuracy</span>
+                                        <span class="stat-num" id="csv-acc">--%</span>
+                                    </div>
+                                    <div class="stat-card green">
+                                        <span class="stat-lbl">Test Set Size</span>
+                                        <span class="stat-num" id="csv-test-size">--</span>
+                                    </div>
+                                    <div class="stat-card blue">
+                                        <span class="stat-lbl">Vocab Size</span>
+                                        <span class="stat-num" id="csv-vocab-size">--</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="metrics-grid">
+                                    <div class="metric-row">
+                                        <span>Precision (Fake)</span>
+                                        <div class="bar-container"><div class="bar bg-green" id="csv-precision-bar" style="width: 0%"></div></div>
+                                        <span class="metric-num" id="csv-precision">--%</span>
+                                    </div>
+                                    <div class="metric-row">
+                                        <span>Recall (Fake)</span>
+                                        <div class="bar-container"><div class="bar bg-blue" id="csv-recall-bar" style="width: 0%"></div></div>
+                                        <span class="metric-num" id="csv-recall">--%</span>
+                                    </div>
+                                    <div class="metric-row">
+                                        <span>F1-Score</span>
+                                        <div class="bar-container"><div class="bar bg-purple" id="csv-f1-bar" style="width: 0%"></div></div>
+                                        <span class="metric-num" id="csv-f1">--%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="confusion-matrix-section">
+                                    <h5>Confusion Matrix (Evaluated on Test Data)</h5>
+                                    <div class="confusion-matrix-grid">
+                                        <div class="cm-cell header"></div>
+                                        <div class="cm-cell header">Predicted REAL</div>
+                                        <div class="cm-cell header">Predicted FAKE</div>
+                                        
+                                        <div class="cm-cell label">Actual REAL</div>
+                                        <div class="cm-cell value correct" id="cm-tn">0</div>
+                                        <div class="cm-cell value incorrect" id="cm-fp">0</div>
+                                        
+                                        <div class="cm-cell label">Actual FAKE</div>
+                                        <div class="cm-cell value incorrect" id="cm-fn">0</div>
+                                        <div class="cm-cell value correct" id="cm-tp">0</div>
+                                    </div>
+                                    <div class="confusion-labels-explanation">
+                                        <span>Correct Predictions: <strong class="text-green" id="cm-correct-total">0</strong></span>
+                                        <span>Incorrect Predictions: <strong class="text-red" id="cm-incorrect-total">0</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ================= TAB 4: MODEL STATS ================= -->
+            <section id="tab-stats" class="tab-pane">
+                <div class="tab-header">
+                    <h2>Model Insights & Parameter Weights</h2>
+                    <p>Explore the learned coefficients of the active Naive Bayes model. In machine learning, features with the highest log-likelihood difference have the strongest impact in predicting news credibility.</p>
+                </div>
+                
+                <div class="panel card full-width-panel">
+                    <div class="panel-header">
+                        <span class="panel-title"><i data-lucide="sliders"></i>Classifier Likelihood Weights</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="stats-overview">
+                            <div class="stat-card">
+                                <span class="stat-lbl">Active Vocabulary</span>
+                                <span class="stat-num" id="info-vocab">0 words</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-lbl">Training Observations</span>
+                                <span class="stat-num" id="info-samples">0 items</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-lbl">Last Trained Timestamp</span>
+                                <span class="stat-num" id="info-timestamp">N/A</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-lbl">Smoothing Alpha</span>
+                                <span class="stat-num" id="info-alpha">0.5</span>
+                            </div>
+                        </div>
+                        
+                        <div class="weights-split">
+                            <div class="weights-column">
+                                <div class="weights-header green">
+                                    <i data-lucide="trending-up"></i>Strongest REAL Indicators (High Coefficients)
+                                </div>
+                                <div class="table-scroll">
+                                    <table class="weights-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Token</th>
+                                                <th>REAL Log likelihood</th>
+                                                <th>FAKE Log likelihood</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="real-weights-table-body">
+                                            <!-- Dynamically populated -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="weights-column">
+                                <div class="weights-header red">
+                                    <i data-lucide="trending-down"></i>Strongest FAKE Indicators (Low Coefficients)
+                                </div>
+                                <div class="table-scroll">
+                                    <table class="weights-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Token</th>
+                                                <th>REAL Log likelihood</th>
+                                                <th>FAKE Log likelihood</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="fake-weights-table-body">
+                                            <!-- Dynamically populated -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+        </main>
+    </div>
+    
+    <!-- Word Info Popup Tooltip -->
+    <div id="word-tooltip" class="tooltip hidden">
+        <div class="tooltip-title" id="tooltip-word">Word</div>
+        <div class="tooltip-body">
+            <p>TF-IDF: <strong id="tooltip-tfidf">0.0000</strong></p>
+            <p>Impact: <strong id="tooltip-impact">0.0000</strong></p>
+            <p class="text-sm" id="tooltip-desc">This word indicates Real News.</p>
+        </div>
+    </div>
+    
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
