@@ -13,8 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
-# Expose port 8000 for the FastAPI server
-EXPOSE 8000
+# Expose port 7860 for Hugging Face Spaces
+EXPOSE 7860
 
-# Command to run the FastAPI application using Gunicorn with Uvicorn workers
-CMD ["gunicorn", "server:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+# Command to run the FastAPI application using Gunicorn on port 7860
+CMD ["gunicorn", "server:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:7860"]
